@@ -4,17 +4,20 @@ const axios = require('axios');
 const app = express();
 const port = 3000;
 
+const primaryApi = "https://www.acethinker.com/downloader/api/video_info.php?url=";
+const backupApi = "https://api.youtubedownloaderccapi.kozow.com/ytdl?url=";
+
 app.get('/ytdl', async (req, res) => {
     const url = req.query.url;
 
     if (!url) {
-        return res.status(400).json({ error: 'URL parameter is required [ parameter /ytdl?url=yt here' });
+        return res.status(400).json({ error: 'URL parameter is required and parameter is ytdl?url=yt here and this alternative YouTube downloader by jonell Magallanes and salamat sa cc prakjik 19 na commands ko yey' });
     }
 
-    const apiEndpoint = `https://www.acethinker.com/downloader/api/video_info.php?url=${encodeURIComponent(url)}&israpid=1&mp3=1`;
+    const apiUrl = `${primaryApi}${encodeURIComponent(url)}&israpid=1&mp3=0`;
 
     try {
-        const response = await axios.get(apiEndpoint, {
+        const response = await axios.get(apiUrl, {
             headers: {
                 'User-Agent': 'Mozilla/5.0',
                 'Accept': 'application/json',
@@ -61,11 +64,49 @@ app.get('/ytdl', async (req, res) => {
                 author: "Jonell Hutchin Magallanes"
             });
         } else {
-            res.status(500).json({ error });
+            
+            const backupApiUrl = `${backupApi}${encodeURIComponent(url)}&type=mp3`;
+
+            try {
+                const backupResponse = await axios.get(backupApiUrl);
+
+                const backupData = backupResponse.data;
+                if (backupData && backupData.url && backupData.download) {
+                    res.json({
+                        url: backupData.download,
+                        title: backupData.title,
+                        author: "Jonell Hutchin Magallanes"
+                    });
+                } else {
+                    res.status(500).json({ error: 'Failed to retrieve video information from both APIs' });
+                }
+            } catch (backupError) {
+                console.error("Backup API failed:", backupError);
+                res.status(500).json({ error: 'Failed to retrieve video information from both APIs' });
+            }
         }
     } catch (error) {
-        console.error("Error occurred:", error);
-        res.status(500).json({ error });
+        console.error("Primary API error:", error);
+        
+        const backupApiUrl = `${backupApi}${encodeURIComponent(url)}&type=mp3`;
+
+        try {
+            const backupResponse = await axios.get(backupApiUrl);
+
+            const backupData = backupResponse.data;
+            if (backupData && backupData.url && backupData.download) {
+                res.json({
+                    url: backupData.download,
+                    title: backupData.title,
+                    author: "Jonell Hutchin Magallanes"
+                });
+            } else {
+                res.status(500).json({ error: 'Failed to retrieve video information from both APIs' });
+            }
+        } catch (backupError) {
+            console.error("Backup API also failed:", backupError);
+            res.status(500).json({ error: 'Failed to retrieve video information from both APIs' });
+        }
     }
 });
 
