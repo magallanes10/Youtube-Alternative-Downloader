@@ -5,7 +5,7 @@ const app = express();
 const port = 3000;
 
 const primaryApi = "https://www.acethinker.com/downloader/api/video_info.php?url=";
-const backupApi = "https://yt-downloader-ccprojects-production.up.railway.app/ytdl?url=";
+const backupApi = "https://ytdownloader.zetsu.xyz/ytdl?url=";
 
 app.get('/ytdl', async (req, res) => {
     const url = req.query.url;
