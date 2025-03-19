@@ -110,6 +110,57 @@ app.get('/ytdl', async (req, res) => {
     }
 });
 
+const qs = require('qs');
+app.use(express.json());
+
+app.get('/tiktok', async (req, res) => {
+    try {
+        const { url } = req.query;
+        if (!url) {
+            return res.status(400).json({ error: 'Missing required parameter: url' });
+        }
+
+        const data = qs.stringify({
+            'url': url,
+            'count': '12',
+            'cursor': '0',
+            'web': '1',
+            'hd': '1'
+        });
+
+        const config = {
+            method: 'POST',
+            url: 'https://www.tikwm.com/api/',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36',
+                'Accept': 'application/json, text/javascript, */*; q=0.01',
+                'Accept-Encoding': 'gzip, deflate, br, zstd',
+                'sec-ch-ua-platform': '"Android"',
+                'sec-ch-ua': '"Chromium";v="130", "Google Chrome";v="130", "Not?A_Brand";v="99"',
+                'sec-ch-ua-mobile': '?1',
+                'x-requested-with': 'XMLHttpRequest',
+                'dnt': '1',
+                'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'origin': 'https://www.tikwm.com',
+                'sec-fetch-site': 'same-origin',
+                'sec-fetch-mode': 'cors',
+                'sec-fetch-dest': 'empty',
+                'referer': 'https://www.tikwm.com/',
+                'accept-language': 'en-US,en;q=0.9,id;q=0.8,fil;q=0.7',
+                'priority': 'u=1, i'
+            },
+            data: data
+        };
+
+        const response = await axios.request(config);
+
+        // Return only the 'data' field from the response
+        res.json(response.data.data);
+    } catch (error) {
+        res.status(500).json({ error: 'Error fetching TikTok data', details: error.message });
+    }
+});
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
